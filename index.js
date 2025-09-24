@@ -3,6 +3,7 @@ const app = express()
 const cors = require("cors")
 const cookieParser = require("cookie-parser")
 const connectDB = require("./db/conn")
+const userroute = require("./routes/user.route")
 require("dotenv").config()
 
 
@@ -21,6 +22,8 @@ app.use('/uploads',express.static('uploads'))
 
 // Connect DB
 connectDB();
+
+app.use("/api/v1/2025/user",userroute)
 
 // Start server only if not in test mode
 if (process.env.NODE_ENV !== "test") {
