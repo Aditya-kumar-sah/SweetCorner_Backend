@@ -18,7 +18,7 @@ const createUser = async (req, res) => {
       password: hashedPassword,
     });
 
-    return res.status(201).json({ message: "Registered successfully!" });
+    return res.status(200).json({ message: "Registered successfully!" });
   } catch (error) {
     return res
       .status(500)
@@ -34,13 +34,13 @@ const loginUser = async (req, res) => {
     // Find user by email
     const existingUser = await User.findOne({ email });
     if (!existingUser) {
-      return res.status(404).json({ message: "User not found!" });
+      return res.status(400).json({ message: "User not found!" });
     }
 
     // Compare entered password with hashed password
     const isMatch = await bcrypt.compare(password, existingUser.password);
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials!" });
+      return res.status(400).json({ message: "Invalid credentials!" });
     }
 
     //creating token
@@ -51,7 +51,7 @@ const loginUser = async (req, res) => {
       { expiresIn: "1h" } // token expiry
     );
 
-    return res.cookie("uid",token).status(200).json({ message: "Login successful!" });
+    return res.cookie("uid",token).status(200).json({ message: "Login successful!" ,token});
   } catch (error) {
     return res
       .status(500)

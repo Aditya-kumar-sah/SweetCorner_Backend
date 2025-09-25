@@ -3,7 +3,7 @@ const app = express()
 const cors = require("cors")
 const cookieParser = require("cookie-parser")
 const connectDB = require("./db/conn")
-const userroute = require("./routes/user.route")
+const userroute = require("./route/user.route")
 require("dotenv").config()
 
 
@@ -20,13 +20,11 @@ app.use(cookieParser())
 app.use('/uploads',express.static('uploads'))
 
 
-// Connect DB
-connectDB();
-
-app.use("/api/v1/2025/user",userroute)
+app.use("/api",userroute)
 
 // Start server only if not in test mode
 if (process.env.NODE_ENV !== "test") {
+  connectDB();
   app.listen(process.env.PORT, () => {
     console.log("Server running on PORT", process.env.PORT);
   });

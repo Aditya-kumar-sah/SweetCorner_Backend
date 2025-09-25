@@ -1,13 +1,13 @@
 const jwt = require("jsonwebtoken");
 
-const authMiddleware = (req, res, next) => {
+const UserAuth = (req, res, next) => {
   try {
     // Get token from cookies or headers
     const token =
       req.cookies?.uid || req.header("Authorization")?.replace("Bearer ", "");
 
     if (!token) {
-      return res.status(401).json({ message: "Access denied. No token provided." });
+      return res.status(400).json({ message: "Access denied. No token provided." });
     }
 
     // Verify token
@@ -18,8 +18,32 @@ const authMiddleware = (req, res, next) => {
 
     next(); // pass control to the next handler
   } catch (error) {
-    return res.status(401).json({ message: "Invalid or expired token." });
+    return res.status(500).json({ message: "Invalid or expired token." });
   }
 };
 
-module.exports = authMiddleware;
+const AdminAuth = (req, res, next) => {
+  try {
+    // Get token from cookies or headers
+    const token =
+      req.cookies?.uid || req.header("Authorization")?.replace("Bearer ", "");
+
+    if (!token) {
+      return res.status(400).json({ message: "Access denied. No token provided." });
+    }
+
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if(!decoded.isAdmin) return res.status(400).json({ message: "Admin not authorised!" });
+
+    // Attach user info to req
+    req.user = decoded;
+
+    next(); // pass control to the next handler
+  } catch (error) {
+    return res.status(500).json({ message: "Invalid or expired token." });
+  }
+};
+
+module.exports = {AdminAuth,UserAuth};
