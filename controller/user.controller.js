@@ -51,7 +51,11 @@ const loginUser = async (req, res) => {
       { expiresIn: "1h" } // token expiry
     );
 
-    return res.cookie("uid",token).status(200).json({ message: "Login successful!" ,token});
+    return res.cookie("uid",token,{
+  httpOnly: true,
+  secure: false,   // set true only in production with HTTPS
+  sameSite: "lax" // required when frontend & backend are on different ports/domains
+}).status(200).json({ message: "Login successful!" ,token});
   } catch (error) {
     return res
       .status(500)
@@ -59,4 +63,44 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = { createUser, loginUser };
+const getUser = async (req, res) => {
+  try {
+    const userId = req.user.id; // user id from token
+
+    // Fetch user from DB excluding password
+    const user = await User.findById(userId).select(
+      "name email isAdmin address profilepic contact"
+    );
+
+    if (!user) {
+      return res.status(400).json({ message: "User not found!" });
+    }
+
+    return res.status(200).json({ user });
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    return res.status(500).json({ message: "Failed to fetch user data" });
+  }
+};
+
+// Logout User
+const logoutUser = async (req, res) => {
+  try {
+    res.clearCookie("uid", {
+      httpOnly: true,
+      secure: false, // set true only in production with HTTPS
+      sameSite: "lax",
+    });
+
+    return res.status(200).json({ message: "Logged out successfully!" });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Logout failed!",
+      error: error.message,
+    });
+  }
+};
+
+
+
+module.exports = { createUser, loginUser,getUser,logoutUser };

@@ -1,3 +1,4 @@
+// const { default: Login } = require("../../frontend/src/pages/Login");
 const Sweet = require("../model/sweet.model");
 
 // Add a new sweet
@@ -5,12 +6,23 @@ const addSweet = async (req, res) => {
   try {
     const { name, price, category, quantity } = req.body;
 
+    let sweetpic;
+
+    if((req.file)){
+        const localPath = req.file.filename;
+        // console.log(process.env.BACKEND_URL);
+        
+        sweetpic = `${process.env.BACKEND_URL}/uploads/${localPath}`; 
+    }
+    
     const existingSweet = await Sweet.findOne({ name });
     if (existingSweet) {
       return res.status(400).json({ message: "Sweet with this name already exists" });
     }
 
-    const sweet = new Sweet({ name, price, category, quantity });
+    let sweet;
+    if(req.file) sweet = new Sweet({ name, price, category, quantity,sweetpic });
+    else sweet = new Sweet({ name, price, category, quantity })
     await sweet.save();
     res.status(200).json({ message: "Sweet added successfully", sweet });
   } catch (error) {
@@ -41,10 +53,10 @@ const searchSweets = async (req, res) => {
     if (category) {
       filter.category = { $regex: category, $options: "i" };
     }
-    if (pricemin !== undefined || pricemax !== undefined) {
+    if (pricemin || pricemax ) {
       filter.price = {};
-      if (pricemin !== undefined) filter.price.$gte = pricemin;
-      if (pricemax !== undefined) filter.price.$lte = pricemax;
+      if (pricemin) filter.price.$gte = Number(pricemin);
+      if (pricemax) filter.price.$lte = Number(pricemax);
     }
 
     const sweets = await Sweet.find(filter);
