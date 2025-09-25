@@ -72,6 +72,16 @@ const updateSweet = async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
+    let sweetpic;
+
+    if((req.file)){
+        const localPath = req.file.filename;
+        // console.log(process.env.BACKEND_URL);
+        
+        sweetpic = `${process.env.BACKEND_URL}/uploads/${localPath}`; 
+        updates.sweetpic = sweetpic;
+    }
+
     const sweet = await Sweet.findByIdAndUpdate(id, updates, { new: true });
     if (!sweet) {
       return res.status(400).json({ message: "Sweet not found" });
