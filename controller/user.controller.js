@@ -52,10 +52,10 @@ const loginUser = async (req, res) => {
     );
 
     return res.cookie("uid",token,{
-  httpOnly: true,
-  secure: false,   // set true only in production with HTTPS
-  sameSite: "lax" // required when frontend & backend are on different ports/domains
-}).status(200).json({ message: "Login successful!" ,token});
+        httpOnly: true,
+        secure: true, // true in production
+        sameSite: "none", // cross-site in prod
+    }).status(200).json({ message: "Login successful!" ,token});
   } catch (error) {
     return res
       .status(500)
