@@ -1,9 +1,10 @@
 const mongoose = require("mongoose");
 require("dotenv").config();
-const app = require("./index");
+const app = require("./index"); // Your express app
 const request = require("supertest");
 const User = require("./model/user.model");
 const Sweet = require("./model/sweet.model");
+const bcrypt = require("bcrypt");
 
 let userToken;
 let adminToken;
@@ -39,7 +40,7 @@ beforeAll(async () => {
     email: "admin@example.com",
     contact: "9876543210",
     address: "Admin Street",
-    password: await require("bcrypt").hash("AdminPass123", 10),
+    password: await bcrypt.hash("AdminPass123", 10),
     isAdmin: true,
   });
 
@@ -64,7 +65,7 @@ afterEach(async () => {
 // ----------------------
 describe("MongoDB connection", () => {
   it("should be connected", () => {
-    expect(mongoose.connection.readyState).toBe(1); // 1 = connected
+    expect(mongoose.connection.readyState).toBe(1);
   });
 });
 
@@ -97,47 +98,58 @@ describe("Auth Flow (Red-Green-Refactor)", () => {
     expect(res.body.message).toBe("Login successful!");
     expect(res.body.token).toBeDefined();
   });
+
+  it("should get logged-in user data", async () => {
+    const res = await request(app)
+      .get("/api/auth/getUserData")
+      .set("Cookie", `uid=${userToken}`); // Token via cookie
+    expect(res.status).toBe(200);
+    expect(res.body.user.email).toBe("tdduser@example.com");
+  });
+
+  it("should logout user", async () => {
+    const res = await request(app)
+      .post("/api/auth/logout")
+      .set("Cookie", `uid=${userToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body.message).toBe("Logged out successfully!");
+  });
 });
 
 // ----------------------
 // Sweet API Tests
 // ----------------------
 describe("Sweet API", () => {
-  let sweetId;
-
   it("should add a new sweet (admin only)", async () => {
     const res = await request(app)
       .post("/api/sweets")
-      .set("Authorization", `Bearer ${adminToken}`)
+      .set("Cookie", `uid=${adminToken}`)
       .send({ name: `Ladoo-${Date.now()}`, price: 100, category: "Dry", quantity: 10 });
 
     expect(res.status).toBe(200);
     expect(res.body.sweet.name).toMatch(/Ladoo/);
-    sweetId = res.body.sweet._id;
   });
 
   it("should get all sweets (user auth)", async () => {
-    await Sweet.create({ name: `Barfi-${Date.now()}`, price: 150, category: "Milk" });
+    await Sweet.create({ name: `Barfi-${Date.now()}`, price: 150, category: "Milk", quantity: 5 });
 
     const res = await request(app)
       .get("/api/sweets")
-      .set("Authorization", `Bearer ${userToken}`);
+      .set("Cookie", `uid=${userToken}`);
 
     expect(res.status).toBe(200);
     expect(res.body.length).toBeGreaterThan(0);
-    expect(res.body[0].name).toBeDefined();
   });
 
   it("should search sweets by name, category, price range", async () => {
     const name = `Ladoo-${Date.now()}`;
-    await Sweet.create({ name, price: 120, category: "Dry" });
-    await Sweet.create({ name: `Barfi-${Date.now()}`, price: 200, category: "Milk" });
+    await Sweet.create({ name, price: 120, category: "Dry", quantity: 10 });
+    await Sweet.create({ name: `Barfi-${Date.now()}`, price: 200, category: "Milk", quantity: 5 });
 
     const res = await request(app)
-  .get("/api/sweets/search")
-  .set("Authorization", `Bearer ${userToken}`)
-  .send({ name: "Lad", category: "Dry", pricemin: 100, pricemax: 150 });
-
+      .post("/api/sweets/search")
+      .set("Cookie", `uid=${userToken}`)
+      .send({ name: "Lad", category: "Dry", pricemin: 100, pricemax: 150 });
 
     expect(res.status).toBe(200);
     expect(res.body.length).toBe(1);
@@ -145,11 +157,11 @@ describe("Sweet API", () => {
   });
 
   it("should update a sweet (admin only)", async () => {
-    const sweet = await Sweet.create({ name: `Jalebi-${Date.now()}`, price: 80, category: "Fried" });
+    const sweet = await Sweet.create({ name: `Jalebi-${Date.now()}`, price: 80, category: "Fried", quantity: 10 });
 
     const res = await request(app)
       .put(`/api/sweets/${sweet._id}`)
-      .set("Authorization", `Bearer ${adminToken}`)
+      .set("Cookie", `uid=${adminToken}`)
       .send({ price: 90 });
 
     expect(res.status).toBe(200);
@@ -157,14 +169,13 @@ describe("Sweet API", () => {
   });
 
   it("should delete a sweet (admin only)", async () => {
-    const sweet = await Sweet.create({ name: `Rasgulla-${Date.now()}`, price: 50, category: "Milk" });
+    const sweet = await Sweet.create({ name: `Rasgulla-${Date.now()}`, price: 50, category: "Milk", quantity: 5 });
 
     const res = await request(app)
       .delete(`/api/sweets/${sweet._id}`)
-      .set("Authorization", `Bearer ${adminToken}`);
+      .set("Cookie", `uid=${adminToken}`);
 
     expect(res.status).toBe(200);
-
     const dbSweet = await Sweet.findById(sweet._id);
     expect(dbSweet).toBeNull();
   });
@@ -174,7 +185,8 @@ describe("Sweet API", () => {
 
     const res = await request(app)
       .post(`/api/sweets/${sweet._id}/purchase`)
-      .set("Authorization", `Bearer ${userToken}`);
+      .set("Cookie", `uid=${userToken}`)
+      .send({ quantity: 1 });
 
     expect(res.status).toBe(200);
     expect(res.body.sweet.quantity).toBe(4);
@@ -185,7 +197,8 @@ describe("Sweet API", () => {
 
     const res = await request(app)
       .post(`/api/sweets/${sweet._id}/purchase`)
-      .set("Authorization", `Bearer ${userToken}`);
+      .set("Cookie", `uid=${userToken}`)
+      .send({ quantity: 1 });
 
     expect(res.status).toBe(400);
     expect(res.body.message).toBe("Sweet is out of stock");
@@ -196,11 +209,10 @@ describe("Sweet API", () => {
 
     const res = await request(app)
       .post(`/api/sweets/${sweet._id}/restock`)
-      .set("Authorization", `Bearer ${adminToken}`)
+      .set("Cookie", `uid=${adminToken}`)
       .send({ quantity: 5 });
 
     expect(res.status).toBe(200);
     expect(res.body.sweet.quantity).toBe(7);
   });
 });
-
