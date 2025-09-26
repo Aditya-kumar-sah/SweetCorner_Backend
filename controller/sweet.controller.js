@@ -113,17 +113,18 @@ const deleteSweet = async (req, res) => {
 const purchaseSweet = async (req, res) => {
   try {
     const { id } = req.params;
+     const { quantity } = req.body;
     const sweet = await Sweet.findById(id);
 
     if (!sweet) {
       return res.status(400).json({ message: "Sweet not found" });
     }
 
-    if (sweet.quantity <= 0) {
+    if (sweet.quantity < quantity) {
       return res.status(400).json({ message: "Sweet is out of stock" });
     }
 
-    sweet.quantity -= 1;
+    sweet.quantity -= quantity;
     await sweet.save();
 
     res.status(200).json({ message: "Sweet purchased successfully", sweet });
