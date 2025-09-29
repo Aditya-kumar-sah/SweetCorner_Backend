@@ -84,11 +84,11 @@ During development, **ChatGPT (AI)** was used as a tool to accelerate the initia
 
 ---
 
-## 🧪 Testing (TDD Approach)
+## Testing (TDD Approach)
 
 The backend was developed following the **RED → GREEN → REFACTOR** cycle:
 
-### 🔴 RED – Write Failing Tests
+### RED – Write Failing Tests
 - Created routes for `user` and `sweet` without controllers.  
 - Tests failed as expected.  
 - Example failures:  
@@ -99,7 +99,7 @@ The backend was developed following the **RED → GREEN → REFACTOR** cycle:
 
 ---
 
-### 🟢 GREEN – Make Tests Pass
+### GREEN – Make Tests Pass
 - Implemented controllers for user and sweet routes.  
 - All tests passed successfully.  
 - Example success:  
@@ -107,14 +107,14 @@ The backend was developed following the **RED → GREEN → REFACTOR** cycle:
 
 ---
 
-### ♻️ REFACTOR – Improve Code
+### REFACTOR – Improve Code
 - Refined and cleaned up controller logic.  
 - Improved maintainability and readability.  
 - Ensured consistent folder structure (`routes/`, `controllers/`, `models/`).
 
 ---
 
-## 📥 How to Clone & Run the Backend
+## How to Clone & Run the Backend
 
 Follow these steps to set up the backend locally:
 
