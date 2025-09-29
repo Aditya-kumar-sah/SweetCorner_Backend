@@ -75,10 +75,9 @@ const updateSweet = async (req, res) => {
     let sweetpic;
 
     if((req.file)){
-        const localPath = req.file.filename;
-        // console.log(process.env.BACKEND_URL);
-        
-        sweetpic = `${process.env.BACKEND_URL}/uploads/${localPath}`; 
+        const localPath = req.file.path;
+
+        sweetpic = await uploadImage(localPath);
         updates.sweetpic = sweetpic;
     }
 
