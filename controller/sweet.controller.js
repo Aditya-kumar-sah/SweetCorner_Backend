@@ -1,5 +1,6 @@
 // const { default: Login } = require("../../frontend/src/pages/Login");
 const Sweet = require("../model/sweet.model");
+const {  uploadImage } = require("../utils/cloudinary");
 
 // Add a new sweet
 const addSweet = async (req, res) => {
@@ -8,16 +9,15 @@ const addSweet = async (req, res) => {
 
     let sweetpic;
 
-    if((req.file)){
-        const localPath = req.file.filename;
-        // console.log(process.env.BACKEND_URL);
-        
-        sweetpic = `${process.env.BACKEND_URL}/uploads/${localPath}`; 
-    }
-    
     const existingSweet = await Sweet.findOne({ name });
     if (existingSweet) {
       return res.status(400).json({ message: "Sweet with this name already exists" });
+    }
+
+    if((req.file)){
+        const localPath = req.file.path;
+
+        sweetpic = await uploadImage(localPath);
     }
 
     let sweet;
