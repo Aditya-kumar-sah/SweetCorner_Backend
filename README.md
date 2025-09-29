@@ -1,6 +1,10 @@
-# Sweet Shop Management System
 
-A modern web application for managing a sweet shop, built with **MERN stack** (MongoDB, Express.js, React.js, Node.js). AI was used to help generate the basic skeleton of the backend and frontend, while the core logic and functionality were implemented independently.  
+#  Sweet Shop Management System – Backend
+
+This repository contains the **backend** of the Sweet Shop Management System, built with **Node.js, Express.js, and MongoDB**.  
+It provides APIs for user authentication, sweet management, and inventory operations.
+
+👉 Frontend Repository: [SweetCorner Frontend](https://github.com/Aditya-kumar-sah/SweetCorner_Frontend)
 
 ---
 
@@ -70,8 +74,6 @@ During development, **ChatGPT (AI)** was used as a tool to accelerate the initia
 
 ---
 
-
-
 ## Technology Stack
 
 - **Frontend:** React.js, Tailwind CSS, React Router
@@ -81,15 +83,46 @@ During development, **ChatGPT (AI)** was used as a tool to accelerate the initia
 - **Testing:** Jest
 
 ---
-##Testing (Backend)
 
-1.RED-I built routes but didn't implemented controllers and got failed output
-   failed user route :  https://github.com/user-attachments/assets/6ed287d5-5105-437a-83c7-8219970ae55b
+## 🧪 Testing (TDD Approach)
 
-   failed sweet route : https://github.com/user-attachments/assets/e2b1d3ee-2bdc-4236-8dbf-8db926cea9c3
+The backend was developed following the **RED → GREEN → REFACTOR** cycle:
 
-2.GREEN-I implemented controllers to get all test passes
-   https://github.com/user-attachments/assets/00e4dc61-1ccb-40d6-ac76-5cfe7572d2b0
-   
-3 REFACTOR: improved and refined codebase for better readability and maintainability
+### 🔴 RED – Write Failing Tests
+- Created routes for `user` and `sweet` without controllers.  
+- Tests failed as expected.  
+- Example failures:  
+  - **User Route Failure:**  
+    ![Failed User Route](https://github.com/user-attachments/assets/6ed287d5-5105-437a-83c7-8219970ae55b)  
+  - **Sweet Route Failure:**  
+    ![Failed Sweet Route](https://github.com/user-attachments/assets/e2b1d3ee-2bdc-4236-8dbf-8db926cea9c3)
+
+---
+
+### 🟢 GREEN – Make Tests Pass
+- Implemented controllers for user and sweet routes.  
+- All tests passed successfully.  
+- Example success:  
+  ![Passed Tests](https://github.com/user-attachments/assets/00e4dc61-1ccb-40d6-ac76-5cfe7572d2b0)
+
+---
+
+### ♻️ REFACTOR – Improve Code
+- Refined and cleaned up controller logic.  
+- Improved maintainability and readability.  
+- Ensured consistent folder structure (`routes/`, `controllers/`, `models/`).
+
+---
+
+## 📥 How to Clone & Run the Backend
+
+Follow these steps to set up the backend locally:
+
+1. **Clone the repository**  
+   git clone https://github.com/Aditya-kumar-sah/SweetCorner_Backend.git
+2. cd SweetCorner_Backend
+3. npm install
+4. add MONGOURL,JWT_SECRET,PORT,BACKEND_URL,FRONTEND_URL to your .env file
+5. npm run dev
+
 
